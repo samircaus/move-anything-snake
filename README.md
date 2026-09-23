@@ -55,7 +55,7 @@ Then open Snake from Schwung's Overtake section.
 After a GitHub release, the installer can also use the public repository:
 
 ```sh
-./scripts/install.sh install-github samircaus/move-anything-snake
+./scripts/install.sh install-module-github samircaus/move-anything-snake
 ```
 
 ## Publishing
