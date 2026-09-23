@@ -13,6 +13,7 @@ A compact Snake game played across Ableton Move's 8×4 pad grid, packaged as a s
 | Knob 8 (orange) | Turn counterclockwise for up, clockwise for down |
 | Track buttons 1–4 | Select the native Move track and the food-note destination |
 | Step buttons 1–4 | Choose major, minor, major pentatonic, or blues |
+| Step button 5 | Toggle single notes and chords (orange when chords are on) |
 | Play | Start, pause, or resume |
 | Jog click | Start, pause, or retry after game over |
 | Shift + Volume Touch + Jog Click | Exit through Schwung's host-level escape |
@@ -23,14 +24,17 @@ accelerates after every piece of food. The session's best score is shown on the
 display and resets when the module is unloaded. Arrow and knob turns share the
 same two-turn input buffer.
 
-Each food pickup sends a short melodic MIDI note to the selected track, starting
-at the chosen root in octave 4 and moving upward through the selected scale.
-The display shows the selected track, root, and scale; the defaults are Track 1,
-C, and major. Track buttons also pass through to Move so a track set to
+Food notes are predictable, not random. In the default Note mode, each pickup
+plays the next scale note, starting at the chosen root in octave 4. Chord mode
+plays a repeating four-chord progression. Major and minor use scale-built
+triads on degrees 1, 4, 5, and 6; pentatonic and blues use three-note voicings
+from their selected scale. The display shows the selected track, key, and mode;
+the defaults are Track 1, C major, and Note mode. Track buttons also pass through to Move so a track set to
 **MIDI In → Auto** becomes the selected receiving track. Schwung sends food
 notes on external MIDI cable 2, using channels 1–4 for Track buttons 1–4.
 If a track has a specific MIDI In channel configured, it must match the
-channel Snake sends. The module releases each note after 160 ms or on exit.
+channel Snake sends. Single notes last 160 ms, chords 260 ms; all notes are
+released on exit or before the next food sound.
 
 ## Build and test
 

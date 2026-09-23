@@ -40,7 +40,7 @@ import {
     GAME_OVER,
     WON
 } from './game-v0.2.4.mjs';
-import { SCALES, ROOT_NAMES, noteForFood, notePacket } from './music-v0.3.1.mjs';
+import { SCALES, ROOT_NAMES, notesForFood, notePackets } from './music-v0.4.0.mjs';
 
 const BOARD_WIDTH = 8;
 const BOARD_HEIGHT = 4;
@@ -53,26 +53,27 @@ let needsLedResync = true;
 let selectedTrack = 0;
 let selectedScale = 0;
 let selectedRoot = 0;
-let activeNote = null;
+let chordMode = false;
+let activeNotes = null;
 
-function sendNote(on, channel, note) {
+function sendNotes(on, channel, notes) {
     return typeof move_midi_inject_to_move === 'function'
-        && move_midi_inject_to_move(notePacket(on, channel, note));
+        && move_midi_inject_to_move(notePackets(on, channel, notes));
 }
 
-function releaseActiveNote() {
-    if (!activeNote) return true;
-    if (!sendNote(false, activeNote.channel, activeNote.note)) return false;
-    activeNote = null;
+function releaseActiveNotes() {
+    if (!activeNotes) return true;
+    if (!sendNotes(false, activeNotes.channel, activeNotes.notes)) return false;
+    activeNotes = null;
     return true;
 }
 
-function playFoodNote(now) {
-    if (!releaseActiveNote()) return;
+function playFoodNotes(now) {
+    if (!releaseActiveNotes()) return;
     const channel = selectedTrack;
-    const note = noteForFood(game.score, selectedScale, selectedRoot);
-    if (sendNote(true, channel, note)) {
-        activeNote = { channel, note, endsAt: now + 160 };
+    const notes = notesForFood(game.score, selectedScale, selectedRoot, chordMode);
+    if (sendNotes(true, channel, notes)) {
+        activeNotes = { channel, notes, endsAt: now + (chordMode ? 260 : 160) };
     }
 }
 
@@ -135,14 +136,14 @@ function drawGame() {
     else if (game.status === GAME_OVER || game.status === WON) print(55, 45, 'JOG: RETRY', 1);
     else print(55, 45, 'RED = FOOD', 1);
     fill_rect(0, 53, 128, 1, 1);
-    const keyLabel = `TRACK ${selectedTrack + 1}  ${ROOT_NAMES[selectedRoot]} ${SCALES[selectedScale].name}`;
+    const keyLabel = `T${selectedTrack + 1} ${ROOT_NAMES[selectedRoot]} ${SCALES[selectedScale].name} ${chordMode ? 'CHORD' : 'NOTE'}`;
     print(Math.floor((128 - text_width(keyLabel)) / 2), 55, keyLabel, 1);
 
     drawPads();
 }
 
 function updateButtonLEDs() {
-    const nextState = `${game.status}:${selectedTrack}:${selectedScale}:${selectedRoot}`;
+    const nextState = `${game.status}:${selectedTrack}:${selectedScale}:${selectedRoot}:${chordMode}`;
     if (nextState === ledState) return;
     const force = ledState === '';
     ledState = nextState;
@@ -160,6 +161,7 @@ function updateButtonLEDs() {
     for (let index = 0; index < SCALES.length; index++) {
         setLED(MoveSteps[index], index === selectedScale ? White : DarkGrey, force);
     }
+    setLED(MoveSteps[4], chordMode ? BrightOrange : DarkGrey, force);
 }
 
 function steer(direction) {
@@ -173,6 +175,11 @@ globalThis.onMidiMessageInternal = function (data) {
     if (isNoiseMessage(data) || isCapacitiveTouchMessage(data)) return;
     const type = data[0] & 0xF0;
     if (type === 0x90 && data[2] > 0) {
+        if (data[1] === MoveSteps[4]) {
+            chordMode = !chordMode;
+            updateButtonLEDs();
+            return;
+        }
         const scaleIndex = MoveSteps.indexOf(data[1]);
         if (scaleIndex >= 0 && scaleIndex < SCALES.length) {
             selectedScale = scaleIndex;
@@ -224,12 +231,13 @@ globalThis.onMidiMessageInternal = function (data) {
 globalThis.onMidiMessageExternal = function () {};
 
 globalThis.init = function () {
-    releaseActiveNote();
+    releaseActiveNotes();
     game.reset();
     pressedButtons.clear();
     selectedTrack = 0;
     selectedScale = 0;
     selectedRoot = 0;
+    chordMode = false;
     nextMoveAt = Date.now() + game.moveIntervalMs;
     ledState = '';
     needsLedResync = true;
@@ -239,11 +247,11 @@ globalThis.init = function () {
 
 globalThis.tick = function () {
     const now = Date.now();
-    if (activeNote && now >= activeNote.endsAt) releaseActiveNote();
+    if (activeNotes && now >= activeNotes.endsAt) releaseActiveNotes();
     if (game.status === RUNNING && now >= nextMoveAt) {
         const oldScore = game.score;
         game.advance();
-        if (game.score > oldScore) playFoodNote(now);
+        if (game.score > oldScore) playFoodNotes(now);
         nextMoveAt = now + game.moveIntervalMs;
         updateButtonLEDs();
     }
@@ -251,5 +259,5 @@ globalThis.tick = function () {
 };
 
 globalThis.onUnload = function () {
-    releaseActiveNote();
+    releaseActiveNotes();
 };
