@@ -70,11 +70,11 @@ After a GitHub release, the installer can also use the public repository:
 Tag a version matching `src/module.json`, then push the tag. GitHub Actions
 tests and packages the module, attaches `snake-module.tar.gz` to a public
 release, and updates `release.json` on `main` for Schwung's installer and
-Module Store. The release archive contains only the `snake/` module folder.
+Manager catalog. The release archive contains only the `snake/` module folder.
 
-To appear in Schwung's built-in Module Store, `snake` also needs an entry in
+To appear in Schwung Manager's module catalog, `snake` also needs an entry in
 the upstream `charlesvestal/schwung` `module-catalog.json`. A public release
-alone supports direct GitHub installation but does not add the store listing.
+alone supports direct GitHub installation but does not add the catalog listing.
 
 ## Development status
 
