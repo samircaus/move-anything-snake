@@ -32,6 +32,7 @@ import {
     setLED,
     setButtonLED
 } from '/data/UserData/schwung/shared/input_filter.mjs';
+import { announce, announceMenuItem } from '/data/UserData/schwung/shared/screen_reader.mjs';
 import {
     SnakeGame,
     READY,
@@ -55,6 +56,7 @@ let selectedScale = 0;
 let selectedRoot = 0;
 let chordMode = false;
 let activeNotes = null;
+let rootAnnouncementAt = 0;
 
 function sendNotes(on, channel, notes) {
     return typeof move_midi_inject_to_move === 'function'
@@ -69,6 +71,7 @@ function releaseActiveNotes() {
 }
 
 function playFoodNotes(now) {
+    announce(`Food. Score ${game.score}`);
     if (!releaseActiveNotes()) return;
     const channel = selectedTrack;
     const notes = notesForFood(game.score, selectedScale, selectedRoot, chordMode);
@@ -168,6 +171,7 @@ function steer(direction) {
     const wasReady = game.status === READY;
     if (game.setDirection(direction) && wasReady) {
         nextMoveAt = Date.now() + game.moveIntervalMs;
+        announce('Snake playing');
     }
 }
 
@@ -178,12 +182,14 @@ globalThis.onMidiMessageInternal = function (data) {
         if (data[1] === MoveSteps[4]) {
             chordMode = !chordMode;
             updateButtonLEDs();
+            announce(chordMode ? 'Chord mode' : 'Single note mode');
             return;
         }
         const scaleIndex = MoveSteps.indexOf(data[1]);
         if (scaleIndex >= 0 && scaleIndex < SCALES.length) {
             selectedScale = scaleIndex;
             updateButtonLEDs();
+            announceMenuItem('Scale', SCALES[selectedScale].name);
         }
         return;
     }
@@ -196,6 +202,7 @@ globalThis.onMidiMessageInternal = function (data) {
         if (delta !== 0) {
             selectedRoot = ((selectedRoot + delta) % ROOT_NAMES.length + ROOT_NAMES.length) % ROOT_NAMES.length;
             updateButtonLEDs();
+            rootAnnouncementAt = Date.now() + 180;
         }
         return;
     }
@@ -220,10 +227,15 @@ globalThis.onMidiMessageInternal = function (data) {
     else if (cc === MoveDown) steer('down');
     else if (cc === MoveLeft) steer('left');
     else if (cc === MoveRight) steer('right');
-    else if (cc >= MoveRow4 && cc <= MoveRow1) selectedTrack = MoveRow1 - cc;
+    else if (cc >= MoveRow4 && cc <= MoveRow1) {
+        selectedTrack = MoveRow1 - cc;
+        announce(`Track ${selectedTrack + 1}`);
+    }
     else if (cc === MovePlay || cc === MoveMainButton) {
         game.togglePause();
         nextMoveAt = Date.now() + game.moveIntervalMs;
+        if (game.status === RUNNING) announce('Snake playing');
+        else if (game.status === PAUSED) announce('Snake paused');
     }
     updateButtonLEDs();
 };
@@ -238,20 +250,28 @@ globalThis.init = function () {
     selectedScale = 0;
     selectedRoot = 0;
     chordMode = false;
+    rootAnnouncementAt = 0;
     nextMoveAt = Date.now() + game.moveIntervalMs;
     ledState = '';
     needsLedResync = true;
     updateButtonLEDs();
     drawGame();
+    announce('Snake. Arrows or knobs one and eight steer. Step five toggles chords.');
 };
 
 globalThis.tick = function () {
     const now = Date.now();
+    if (rootAnnouncementAt > 0 && now >= rootAnnouncementAt) {
+        rootAnnouncementAt = 0;
+        announceMenuItem('Root', ROOT_NAMES[selectedRoot]);
+    }
     if (activeNotes && now >= activeNotes.endsAt) releaseActiveNotes();
     if (game.status === RUNNING && now >= nextMoveAt) {
         const oldScore = game.score;
         game.advance();
         if (game.score > oldScore) playFoodNotes(now);
+        if (game.status === GAME_OVER) announce(`Game over. Score ${game.score}. Jog click to retry.`);
+        else if (game.status === WON) announce(`You win. Score ${game.score}. Jog click to retry.`);
         nextMoveAt = now + game.moveIntervalMs;
         updateButtonLEDs();
     }

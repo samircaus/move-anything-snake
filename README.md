@@ -36,6 +36,9 @@ If a track has a specific MIDI In channel configured, it must match the
 channel Snake sends. Single notes last 160 ms, chords 260 ms; all notes are
 released on exit or before the next food sound.
 
+Snake announces mode, track, scale, root, score, pause, and game-over changes
+through Schwung's screen reader when it is enabled.
+
 ## Build and test
 
 Requires Node.js 18 or newer. There are no npm dependencies or native binaries.
