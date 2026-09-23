@@ -1,0 +1,11 @@
+{
+  "name": "move-anything-snake",
+  "version": "0.3.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "sh scripts/build.sh",
+    "check": "node --check src/game-v0.2.4.mjs && node --check src/music-v0.3.1.mjs && node --check src/ui.js"
+  }
+}

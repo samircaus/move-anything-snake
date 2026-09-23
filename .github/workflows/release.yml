@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify tag version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MODULE_VERSION="$(node -p "require('./src/module.json').version")"
+          test "$TAG_VERSION" = "$MODULE_VERSION"
+
+      - name: Test and build
+        run: npm run build
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/snake-module.tar.gz
+
+      - name: Update Module Store release metadata
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          git fetch origin main
+          git checkout -B main origin/main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          printf '{\n  "version": "%s",\n  "download_url": "https://github.com/%s/releases/download/%s/snake-module.tar.gz"\n}\n' \
+            "$VERSION" "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" > release.json
+          git add release.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update release.json for ${GITHUB_REF_NAME}"
+            git push origin main
+          fi

@@ -1,0 +1,54 @@
+{
+  "title": "Snake",
+  "children": [
+    {
+      "title": "How to Play",
+      "lines": [
+        "Eat the red food on",
+        "the 8x4 pad grid.",
+        "Avoid your own tail.",
+        "Edges wrap around.",
+        "",
+        "The snake speeds up",
+        "after every point."
+      ]
+    },
+    {
+      "title": "Controls",
+      "lines": [
+        "Arrows: Steer/start",
+        "Knob 1: Left/right",
+        "Knob 2: Root note",
+        "Knob 8: Up/down",
+        "Play: Pause/resume",
+        "Jog click: Start or",
+        " retry after game over",
+        "",
+        "Shift + Volume + Jog",
+        "click: Exit"
+      ]
+    },
+    {
+      "title": "Food Notes",
+      "lines": [
+        "Food plays a note",
+        "on the selected Move",
+        "track instrument.",
+        "",
+        "Track 1-4: Select",
+        "Move track and MIDI",
+        "destination.",
+        "Step 1-4: Select",
+        "major, minor, penta,",
+        "or blues scale.",
+        "Knob 2: Change root",
+        "among all 12 notes.",
+        "",
+        "MIDI In Auto follows",
+        "the selected track.",
+        "Specific channels:",
+        "match track number."
+      ]
+    }
+  ]
+}
