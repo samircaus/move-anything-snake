@@ -1,14 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ROOT_NAMES, noteForFood, notesForFood, notePacket, notePackets } from '../src/music-v0.4.0.mjs';
+import { ROOT_NAMES, noteForFood, notesForFood, notePacket, notePackets } from '../src/music-v0.4.2.mjs';
 
-test('food notes follow the selected scale across octaves', () => {
-    assert.deepEqual([1, 2, 3, 7, 8].map(score => noteForFood(score, 0)), [60, 62, 64, 71, 72]);
-    assert.deepEqual([1, 2, 3].map(score => noteForFood(score, 1)), [60, 62, 63]);
-    assert.deepEqual([1, 2, 6].map(score => noteForFood(score, 2)), [60, 62, 72]);
+test('food notes follow a bounded rise-and-fall motif in the selected scale', () => {
+    assert.deepEqual([1, 2, 3, 4, 5, 6, 7, 8, 9].map(score => noteForFood(score, 0)),
+        [60, 64, 67, 65, 69, 64, 62, 65, 60]);
+    assert.deepEqual([1, 2, 3].map(score => noteForFood(score, 1)), [60, 63, 67]);
+    assert.deepEqual([1, 2, 6].map(score => noteForFood(score, 2)), [60, 64, 64]);
     assert.equal(ROOT_NAMES.length, 12);
-    assert.deepEqual([1, 2, 3].map(score => noteForFood(score, 1, 6)), [66, 68, 69]);
+    assert.deepEqual([1, 2, 3].map(score => noteForFood(score, 1, 6)), [66, 69, 73]);
     assert.equal(noteForFood(1, 0, 11), 71);
+    assert.ok(Math.max(...Array.from({length: 32}, (_, index) => noteForFood(index + 1, 0, 0))) <= 71);
 });
 
 test('track channel appears in both cable-2 note packets', () => {

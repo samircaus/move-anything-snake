@@ -9,12 +9,14 @@ export const ROOT_NAMES = Object.freeze([
     'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'
 ]);
 
+// A short, repeatable contour instead of climbing through every octave.
+const MELODY_DEGREES = Object.freeze([0, 2, 4, 3, 5, 2, 1, 3]);
+
 export function noteForFood(score, scaleIndex = 0, root = 0) {
     const scale = SCALES[scaleIndex] || SCALES[0];
-    const step = Math.max(0, score - 1);
-    const octave = Math.floor(step / scale.intervals.length);
-    const degree = step % scale.intervals.length;
-    return Math.min(127, 60 + root + octave * 12 + scale.intervals[degree]);
+    const step = Math.max(0, score - 1) % MELODY_DEGREES.length;
+    const degree = MELODY_DEGREES[step] % scale.intervals.length;
+    return 60 + root + scale.intervals[degree];
 }
 
 export function notesForFood(score, scaleIndex = 0, root = 0, chordMode = false) {

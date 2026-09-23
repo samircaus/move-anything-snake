@@ -1,10 +1,10 @@
 {
   "id": "snake",
   "name": "Snake",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Snake on Move's pad grid with knob steering and food notes",
   "author": "Samir Caus",
-  "ui": "ui-v0.4.1.js",
+  "ui": "ui-v0.4.2.js",
   "api_version": 2,
   "component_type": "overtake",
   "capabilities": {

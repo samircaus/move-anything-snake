@@ -25,7 +25,8 @@ display and resets when the module is unloaded. Arrow and knob turns share the
 same two-turn input buffer.
 
 Food notes are predictable, not random. In the default Note mode, each pickup
-plays the next scale note, starting at the chosen root in octave 4. Chord mode
+plays the next note in a repeating eight-note rise-and-fall motif within one
+octave of the chosen root. It never drifts into ever-higher octaves. Chord mode
 plays a repeating four-chord progression. Major and minor use scale-built
 triads on degrees 1, 4, 5, and 6; pentatonic and blues use three-note voicings
 from their selected scale. The display shows the selected track, key, and mode;

@@ -41,7 +41,7 @@ import {
     GAME_OVER,
     WON
 } from './game-v0.2.4.mjs';
-import { SCALES, ROOT_NAMES, notesForFood, notePackets } from './music-v0.4.0.mjs';
+import { SCALES, ROOT_NAMES, notesForFood, notePackets } from './music-v0.4.2.mjs';
 
 const BOARD_WIDTH = 8;
 const BOARD_HEIGHT = 4;
